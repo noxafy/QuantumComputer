@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=45"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "QuantumComputer"
+version = "1.0"
+description = "Quantum computer simulation with operator tracking"
+license = {file = "LICENSE"}
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "numpy>=1.20",
+    "psutil>=5.9",
+    "matplotlib>=3.5",
+    "utils @ git+https://github.com/noxafy/utils.git",
+]
+
+[project.optional-dependencies]
+scipy = ["scipy>=1.7"]
+qiskit = ["qiskit>=1.3.0,<2.0"]
+
+[project.urls]
+Homepage = "https://github.com/noxafy/QuantumComputer"
