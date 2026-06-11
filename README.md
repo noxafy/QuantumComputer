@@ -1,7 +1,16 @@
 # QuantumComputer
 
-A high-level NumPy-based quantum computer simulator. Simulate state vectors or density matrices while tracking the effective quantum channel as Kraus operators or Choi superoperators.
+A REPL-style quantum computer simulator with easy usage and high versatility.
 
+**Feature highlights**
+- **Easy-to-use** interface to quickly implement algorithms
+- Switch betwween simulating **state vector and density matrix**
+- Track the **effective quantum channel** as Kraus operators or Choi matrix
+- **Add and remove qubits** mid-circuit
+- Decohering measurement
+- A range of **quantum info tools** for state analysis
+
+**Example usage**
 ```python
 from QuantumComputer import QC
 
@@ -24,7 +33,7 @@ print("Number of Kraus operators:", len(ops))
 Number of Kraus operators: 4
 ```
 
-## Installation
+### Installation
 
 ```bash
 pip install .
@@ -57,17 +66,17 @@ QC(['a1', 'a2'])
 
 ### State evolution
 
-| Gate | Method | Gate | Method |
-|------|--------|------|--------|
-| X | `.x(q)` | Pauli-Z | `.z(q)` |
-| Y | `.y(q)` | Hadamard | `.h(q)` |
-| S | `.s(q)` | T | `.t(q)` |
-| S† | `.sdg(q)` | T† | `.tdg(q)` |
-| Rx | `.rx(θ, q)` | Ry | `.crx(θ, q)` |
-| CNOT | `.cx(c, t)` | CZ | `.cz(c, t)` |
-| Controlled-U | `.c(U, c, t)` | Negative control | `.c(U, c, t, True)` |
-| Negative X | `.nx(c, t)` | Toffoli | `.ccx(c1, c2, t)` |  
-| SWAP | `.swap(a, b)` | CSWAP | `.cswap(c, a, b)` |
+| Gate |    Method    |   Gate   |     Method     |
+|------|--------------|----------|----------------|
+| X    | `.x(q)`      | Pauli-Z  | `.z(q)`        |
+| Y    | `.y(q)`      | Hadamard | `.h(q)`        |
+| S    | `.s(q)`      | T        | `.t(q)`        |
+| S†   | `.sdg(q)`    | T†       | `.tdg(q)`      |
+| Rx   | `.rx(θ,q)`   | Ry       | `.crx(θ, q)`   |
+| CNOT | `.cx(c,t)`   | CZ       | `.cz(c, t)`    |
+| C-U  | `.c(U,c,t)`  | Neg. control | `.c(U, c, t, True)` |
+| NCX  | `.nx(c,t)`   | Toffoli  | `.ccx(c1, c2, t)` |
+| SWAP | `.swap(a,b)` | CSWAP    | `.cswap(c, a, b)` |
 
 ... and much more.
 
