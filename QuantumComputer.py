@@ -2,6 +2,7 @@ import sys, psutil
 from contextlib import contextmanager
 from math import prod, sqrt
 import numpy as np
+from collections import Counter
 try:
     import scipy.sparse as sp
 except ImportError:
@@ -120,8 +121,11 @@ class QuantumComputer:
         if is_int(state) and state == 0:
             if qubits is None:
                 return  # avoid adding a qubit
-            if not is_int(qubits) and is_state(qubits, print_errors=False, check=self.check_level):
-                state = as_state(qubits, check=self.check_level)
+            elif is_int(qubits) or isinstance(qubits, list):
+               pass
+            elif is_state(qubits, print_errors=False, check=0) \
+                or (hasattr(qubits, '__len__') and len(qubits) > 0 and hasattr(qubits[0], '__len__')):
+                state = as_state(qubits, renormalize=True, check=self.check_level)
                 qubits = count_qubits(state)
         elif qubits is None and is_state(state, print_errors=False, check=self.check_level):
             state = as_state(state, check=self.check_level)

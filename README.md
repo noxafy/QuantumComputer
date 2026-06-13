@@ -44,9 +44,10 @@ pip install .
 ### Initialization from arbitrary states
 
 ```python
-qc = QC(2)             # 2 qubits in all-zero state |00>
-qc = QC([1, 0, 0, 1])  # Provide an array / ndarray
-qc = QC('00 + 2*11')   # String notation
+qc = QC(2)            # 2 qubits in all-zero state |00>
+qc = QC(np.ones(8))   # Provide an ndarray vector (auto-renormalized)
+qc = QC(np.eye(16))   #
+qc = QC('00 + 2*11')  # String notation
 ```
 
 ### State handling
