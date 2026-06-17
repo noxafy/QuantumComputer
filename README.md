@@ -1,35 +1,29 @@
 # QuantumComputer
 
-A REPL-style quantum computer simulator with easy usage and high versatility.
+A REPL-style quantum computer simulator with focus on usability. Allows to dynamically add and remove qubits, switch between state vector or density matrix simulation and track the effective channel (as Kraus operators or Choi matrix).
 
-**Feature highlights**
-- **Easy-to-use** interface to quickly implement algorithms
-- Switch betwween simulating **state vector and density matrix**
-- Track the **effective quantum channel** as Kraus operators or Choi matrix
-- **Add and remove qubits** mid-circuit
-- Decohering measurement
-- A range of **quantum info tools** for state analysis
-
-**Example usage**
+Example:
 ```python
 from QuantumComputer import QC
 
-state, energy = range(2), range(2, 5)
-unitary = QC().x(0).cx(0,1).U   # operator tracking is active by default for small system
+qc = QC()
+qc.h(0).cx(0,1)  # evolve to a Bell state (qubits get added as needed)
+U = qc.U         # operator tracking is active by default for small systems
 
-qc = QC('00+11')
+state, energy = range(2), range(2, 5)
+qc = QC(qc.get_state())
 qc.add(energy)                  # Add ancilla qubits
-qc.pe(unitary, state, energy)
-qc.measure(energy, collapse=False)
+qc.pe(U, state, energy)
 print(qc[0,1])                  # Look at the state RDM
+qc.remove(energy)
 ops = qc.get_operators()        # Obtain the effective channel
 print("Number of Kraus operators:", len(ops))
 ```
 ```
-[[ 0.25 +0.j -0.   +0.j  0.125+0.j  0.125+0.j]
- [-0.   -0.j  0.25 +0.j  0.125-0.j  0.125-0.j]
- [ 0.125-0.j  0.125+0.j  0.25 +0.j  0.   +0.j]
- [ 0.125-0.j  0.125+0.j  0.   -0.j  0.25 -0.j]]
+[[ 0.3125+0.j  0.0625-0.j  0.0625+0.j  0.0625-0.j]
+ [ 0.0625+0.j  0.3125+0.j  0.0625+0.j  0.0625-0.j]
+ [ 0.0625-0.j  0.0625-0.j  0.1875+0.j -0.0625+0.j]
+ [ 0.0625+0.j  0.0625+0.j -0.0625-0.j  0.1875+0.j]]
 Number of Kraus operators: 4
 ```
 
@@ -39,9 +33,9 @@ Number of Kraus operators: 4
 pip install .
 ```
 
-`scipy` is optional, but recommended for sparse matrices.
+`scipy` is optional, but recommended for sparse matrices (Choi matrix, in particular).
 
-### Initialization from arbitrary states
+### State initialization
 
 ```python
 qc = QC(2)            # 2 qubits in all-zero state |00>
@@ -65,42 +59,52 @@ QC('abcdefg')        # qubits may be named with strings
 QC(['a1', 'a2'])
 ```
 
-### State evolution
+### Evolution
 
-| Gate |    Method    |   Gate   |     Method     |
-|------|--------------|----------|----------------|
-| X    | `.x(q)`      | Pauli-Z  | `.z(q)`        |
-| Y    | `.y(q)`      | Hadamard | `.h(q)`        |
-| S    | `.s(q)`      | T        | `.t(q)`        |
-| S†   | `.sdg(q)`    | T†       | `.tdg(q)`      |
-| Rx   | `.rx(θ,q)`   | Ry       | `.crx(θ, q)`   |
-| CNOT | `.cx(c,t)`   | CZ       | `.cz(c, t)`    |
-| C-U  | `.c(U,c,t)`  | Neg. control | `.c(U, c, t, True)` |
+| Gate | Method       | Gate     | Method            |
+|------|--------------|----------|-------------------|
+| X    | `.x(q)`      | Pauli-Z  | `.z(q)`           |
+| Y    | `.y(q)`      | Hadamard | `.h(q)`           |
+| S    | `.s(q)`      | T        | `.t(q)`           |
+| S†   | `.sdg(q)`    | T†       | `.tdg(q)`         |
+| Rx   | `.rx(θ,q)`   | Ry       | `.crx(θ, q)`      |
+| CNOT | `.cx(c,t)` | Controlled U|`.c(U,c,t)`       |
+| CZ   | `.cz(c,t)` | Neg. control|`.c(U,c,t,True)`  |
 | NCX  | `.nx(c,t)`   | Toffoli  | `.ccx(c1, c2, t)` |
 | SWAP | `.swap(a,b)` | CSWAP    | `.cswap(c, a, b)` |
 
 ... and much more.
 
 ```python
-qc(U, qubits)                 # arbitrary set of Kraus operators
+qc(U, [0,1])                  # arbitrary set of Kraus operators (or just a unitary)
 qc('CX @ HI')                 # string notation for unitaries
 qc.apply_qiskit_circuit(qc2)  # apply a circuit defined by a qiskit object
 
+from utils import XX
 qc.measure()                  # collapse, return basis state as binary string
 qc.measure([0,1], obs=XX)     # `obs` allows other observables than Z basis
-qc.measure(collapse=False)    # decoherence (no collapse) → auto-conversion to density matrix
-qc.decohere()                 # shorthand for above
-qc.sample([0,1], shots=1000)  # sample without collapse
+qc.decohere()                 # decoherence → auto-conversion to density matrix
+qc.measure(collapse=False)    # equivalent to above
+qc.sample([0,1], shots=1000)  # sample without collapse (unphysical, yes, but why not)
 qc.probs_pp()                 # pretty-print probabilities
 ```
 
 Use the context maanger `qc.observable(obs, qubits)` to change the default observable.
 
+```python
+qc = QC(2).h()
+with qc.observable(XX, [0,1]):
+    print(qc.probs())
+```
+```
+[0.  0.  0.5 0.5]
+```
+
 ### Basic algorithms
 
 ```python
-qc.qft([0,1,2])          # Quantum Fourier Transform
-qc.iqft([0,1,2])         # Inverse QFT
+qc.qft(qubits)           # Quantum Fourier Transform
+qc.iqft(qubits)          # Inverse QFT
 qc.pe(U, state, energy)  # Phase estimation
 ```
 
@@ -124,15 +128,13 @@ The Choi matrix representation may show much high performances when `scipy` is i
 ### Noise
 
 ```python
-qc.noise('depolarizing', 0, p=0.01)
-qc.noise('amplitude_damping', [0,1], p=0.05)
-qc.noise('bitflip', 0, p=0.1)
+qc.noise('bitflip', 0, p=0.05)
 
-# Noise schedule (add noise after initialization and each gate and measurement)
 qc = QC(2, noise_schedule=lambda qubits, process, qc: qc.noise('depolarizing', qubits, p=0.01))
+# See `create_benchmark_noise_scheduler` for a scheduler factory.
 ```
 
-Available default noise models: `depolarizing`, `amplitude_damping`, `phase_damping`, `bitflip`, `phaseflip`, `zdrift`. See `create_benchmark_noise_scheduler` for a scheduler factory. The context manager `qc.no_noise()` can be used to temporarily disable the noise schedule.
+Available default noise models: `depolarizing`, `amplitude_damping`, `phase_damping`, `bitflip`, `phaseflip`, `zdrift`. The context manager `qc.no_noise()` can be used to temporarily disable the noise schedule.
 
 ### Quantum info
 
@@ -154,6 +156,6 @@ python test.py
 
 ### License
 
-Copyright (C) 2026 Rae Müller
+Copyright © 2026 Rae Müller
 
 Licensed under the GNU GPL v3 or later — see [`LICENSE`](LICENSE).
