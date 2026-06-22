@@ -128,6 +128,13 @@ def _test_QuantumComputer():
     # assert not qc.is_unitary(1)  # not implemented yet
     # assert qc.is_unitary([0,2])
 
+    # test qc.c flag order
+    qc = QC(3)
+    qc.x(0)
+    qc.c(X, [0,1,2], 3, [False, True, True])
+    res = qc.measure()
+    assert res == '1001', f"{res} ≠ 1001"
+
     # more complex test
     qc = QC(15)
     U = parse_unitary('XYZCZYX')

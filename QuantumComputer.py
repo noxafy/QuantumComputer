@@ -1519,7 +1519,7 @@ class QuantumComputer:
 
         U = self.parse_unitary(U, len(target), check=self.check_level)
         assert len(control) == len(negative), f"There must be as many negative/positive flags are control qubits, but were: {len(control)} ≠ {len(negative)}"
-        for neg_i in negative:
+        for neg_i in reversed(negative):  # not the same as putting reverse=True flag in C_
             U = C_(U, negative=neg_i)
         return self(U, control + target)
 
