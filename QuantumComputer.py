@@ -1490,14 +1490,14 @@ class QuantumComputer:
     def sdg(self, q):
         return self(S_dg, q)
 
-    def cx(self, control, target, negative=False):
-        return self._ci_elem(NX if negative else CX, control, target) or self.c(X, control, target, negative)
+    def cx(self, control, target, on=1):
+        return self._ci_elem(CX if on else NX, control, target) or self.c(X, control, target, on)
 
-    def cy(self, control, target, negative=False):
-        return self._ci_elem(NY if negative else CY, control, target) or self.c(Y, control, target, negative)
+    def cy(self, control, target, on=1):
+        return self._ci_elem(CY if on else NY, control, target) or self.c(Y, control, target, on)
 
-    def cz(self, control, target, negative=False):
-        return self._ci_elem(NZ if negative else CZ, control, target) or self.c(Z, control, target, negative)
+    def cz(self, control, target, on=1):
+        return self._ci_elem(CZ if on else NZ, control, target) or self.c(Z, control, target, on)
 
     def _ci_elem(self, gate, control, target):
         if isinstance(control, list) or isinstance(control, list):
@@ -1516,16 +1516,17 @@ class QuantumComputer:
     def ccx(self, control1, control2, target):
         return self(Toffoli, [control1, control2, target])
 
-    def c(self, U, control, target, negative=False):
+    def c(self, U, control, target, on=1):
         control = as_list_not_str(control)
         target  = as_list_not_str(target)
-        if isinstance(negative, bool):
-            negative = [negative]*len(control)
+        if isinstance(on, int):
+            assert on == 0 or on == 1, f"on must be 0 or 1, but was {on}"
+            on = [on]*len(control)
 
         U = self.parse_unitary(U, len(target), check=self.check_level)
-        assert len(control) == len(negative), f"There must be as many negative/positive flags are control qubits, but were: {len(control)} ≠ {len(negative)}"
-        for neg_i in reversed(negative):  # not the same as putting reverse=True flag in C_
-            U = C_(U, negative=neg_i)
+        assert len(control) == len(on), f"There must be as many \"on\" flags as control qubits, but were: {len(control)} ≠ {len(on)}"
+        for on_i in reversed(on):  # not the same as putting reverse=True flag in C_
+            U = C_(U, on=on_i)
         return self(U, control + target)
 
     def swap(self, qubit1, qubit2):
@@ -1543,20 +1544,20 @@ class QuantumComputer:
     def rz(self, angle, q):
         return self(Rz(angle), q)
 
-    def crx(self, angle, control, target, negative=False):
-        return self.c(Rx(angle), control, target, negative=negative)
+    def crx(self, angle, control, target, on=1):
+        return self.c(Rx(angle), control, target, on=on)
 
-    def cry(self, angle, control, target, negative=False):
-        return self.c(Ry(angle), control, target, negative=negative)
+    def cry(self, angle, control, target, on=1):
+        return self.c(Ry(angle), control, target, on=on)
 
-    def crz(self, angle, control, target, negative=False):
-        return self.c(Rz(angle), control, target, negative=negative)
+    def crz(self, angle, control, target, on=1):
+        return self.c(Rz(angle), control, target, on=on)
 
     def p(self, angle, q):
         return self(P(angle), q)
 
-    def cp(self, angle, control, target, negative=False):
-        return self.c(P(angle), control, target, negative=negative)
+    def cp(self, angle, control, target, on=1):
+        return self.c(P(angle), control, target, on=on)
 
     def phase(self, angle, q):
         return self(np.exp(-1j*angle/2)*I, q)
@@ -1584,15 +1585,15 @@ class QuantumComputer:
             self(U, q)
         return self
 
-    def cqft(self, control, qubits, negative=False, inverse=False, do_swaps=True):
+    def cqft(self, control, qubits, on=1, inverse=False, do_swaps=True):
         qubits = self._check_qubit_arguments(qubits, False)
         QFT = Fourier_matrix(n=2**len(qubits), swap=not do_swaps)
         if inverse:
             QFT = QFT.T.conj()
-        return self.c(QFT, control, qubits, negative=negative)
+        return self.c(QFT, control, qubits, on=on)
 
-    def ciqft(self, control, qubits, negative=False, do_swaps=True):
-        return self.cqft(control, qubits, negative, True, do_swaps)
+    def ciqft(self, control, qubits, on=1, do_swaps=True):
+        return self.cqft(control, qubits, on, True, do_swaps)
 
     def qft(self, qubits, inverse=False, do_swaps=True, single_unitary=True):
         qubits = self._check_qubit_arguments(qubits, False)

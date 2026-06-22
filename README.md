@@ -69,10 +69,9 @@ QC(['a1', 'a2'])
 | S    | `.s(q)`      | T        | `.t(q)`           |
 | S†   | `.sdg(q)`    | T†       | `.tdg(q)`         |
 | Rx   | `.rx(θ,q)`   | Ry       | `.crx(θ, q)`      |
-| CNOT | `.cx(c,t)` | Controlled U|`.c(U,c,t)`       |
-| CZ   | `.cz(c,t)` | Neg. control|`.c(U,c,t,True)`  |
-| NCX  | `.nx(c,t)`   | Toffoli  | `.ccx(c1, c2, t)` |
-| SWAP | `.swap(a,b)` | CSWAP    | `.cswap(c, a, b)` |
+| CNOT | `.cx(c,t)`   | Controlled U | `.c(U,c,t)`   |
+| CZ   | `.cz(c,t)`   | Neg. control | `.c(U,c,t,0)` |
+| NCX  | `.nx(c,t)`   | SWAP     | `.swap(a,b)`      |
 
 ... and much more.
 

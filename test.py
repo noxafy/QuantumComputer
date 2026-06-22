@@ -131,7 +131,7 @@ def _test_QuantumComputer():
     # test qc.c flag order
     qc = QC(3)
     qc.x(0)
-    qc.c(X, [0,1,2], 3, [False, True, True])
+    qc.c(X, [0,1,2], 3, (1,0,0))
     res = qc.measure()
     assert res == '1001', f"{res} ≠ 1001"
 
