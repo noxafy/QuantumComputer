@@ -1490,14 +1490,19 @@ class QuantumComputer:
     def sdg(self, q):
         return self(S_dg, q)
 
-    def cx(self, control, target):
-        return self(CX, [control, target])
+    def cx(self, control, target, negative=False):
+        return self._ci_elem(NX if negative else CX, control, target) or self.c(X, control, target, negative)
 
-    def cy(self, control, target):
-        return self(CY, [control, target])
+    def cy(self, control, target, negative=False):
+        return self._ci_elem(NY if negative else CY, control, target) or self.c(Y, control, target, negative)
 
-    def cz(self, control, target):
-        return self(CZ, [control, target])
+    def cz(self, control, target, negative=False):
+        return self._ci_elem(NZ if negative else CZ, control, target) or self.c(Z, control, target, negative)
+
+    def _ci_elem(self, gate, control, target):
+        if isinstance(control, list) or isinstance(control, list):
+            return False
+        return self(gate, [control, target])
 
     def nx(self, control, target):
         return self(NX, [control, target])
@@ -1523,9 +1528,6 @@ class QuantumComputer:
             U = C_(U, negative=neg_i)
         return self(U, control + target)
 
-    def cc(self, U, control1, control2, target):
-        return self.c(U, [control1, control2], target)
-
     def swap(self, qubit1, qubit2):
         return self(SWAP, [qubit1, qubit2])
 
@@ -1541,20 +1543,20 @@ class QuantumComputer:
     def rz(self, angle, q):
         return self(Rz(angle), q)
 
-    def crx(self, angle, control, target):
-        return self.c(Rx(angle), control, target)
+    def crx(self, angle, control, target, negative=False):
+        return self.c(Rx(angle), control, target, negative=negative)
 
-    def cry(self, angle, control, target):
-        return self.c(Ry(angle), control, target)
+    def cry(self, angle, control, target, negative=False):
+        return self.c(Ry(angle), control, target, negative=negative)
 
-    def crz(self, angle, control, target):
-        return self.c(Rz(angle), control, target)
+    def crz(self, angle, control, target, negative=False):
+        return self.c(Rz(angle), control, target, negative=negative)
 
     def p(self, angle, q):
         return self(P(angle), q)
 
-    def cp(self, angle, control, target):
-        return self.c(P(angle), control, target)
+    def cp(self, angle, control, target, negative=False):
+        return self.c(P(angle), control, target, negative=negative)
 
     def phase(self, angle, q):
         return self(np.exp(-1j*angle/2)*I, q)
@@ -1581,6 +1583,16 @@ class QuantumComputer:
                 U *= np.exp(-1j*(phi + lam)/2)
             self(U, q)
         return self
+
+    def cqft(self, control, qubits, negative=False, inverse=False, do_swaps=True):
+        qubits = self._check_qubit_arguments(qubits, False)
+        QFT = Fourier_matrix(n=2**len(qubits), swap=not do_swaps)
+        if inverse:
+            QFT = QFT.T.conj()
+        return self.c(QFT, control, qubits, negative=negative)
+
+    def ciqft(self, control, qubits, negative=False, do_swaps=True):
+        return self.cqft(control, qubits, negative, True, do_swaps)
 
     def qft(self, qubits, inverse=False, do_swaps=True, single_unitary=True):
         qubits = self._check_qubit_arguments(qubits, False)
