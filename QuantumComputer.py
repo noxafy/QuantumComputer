@@ -2,7 +2,6 @@ import sys, psutil
 from contextlib import contextmanager
 from math import prod, sqrt
 import numpy as np
-from collections import Counter
 try:
     import scipy.sparse as sp
 except ImportError:
