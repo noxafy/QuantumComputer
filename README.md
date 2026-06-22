@@ -12,10 +12,10 @@ U = qc.U         # operator tracking is active by default for small systems
 
 state, energy = range(2), range(2, 5)
 qc = QC(qc.get_state())
-qc.add(energy)                  # Add ancilla qubits
+qc.add(energy)                  # Add ancilla qubits (output space only)
 qc.pe(U, state, energy)
 print(qc[0,1])                  # Look at the state RDM
-qc.remove(energy)
+qc.remove(energy)               # Trace out ancillas
 ops = qc.get_operators()        # Obtain the effective channel
 print("Number of Kraus operators:", len(ops))
 ```
@@ -29,6 +29,7 @@ Number of Kraus operators: 4
 
 ### Installation
 
+Clone and cd into the folder, then
 ```bash
 pip install .
 ```
